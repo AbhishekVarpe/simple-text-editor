@@ -1,0 +1,114 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+
+public class TextEditor extends JFrame implements ActionListener {
+    private JTextArea textArea;
+    private JFileChooser fileChooser;
+
+    public TextEditor() {
+        setTitle("Text Editor");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        textArea = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        add(scrollPane, BorderLayout.CENTER);
+
+        JMenuBar menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
+
+        JMenu fileMenu = new JMenu("File");
+        JMenu editMenu = new JMenu("Edit");
+        menuBar.add(fileMenu);
+        menuBar.add(editMenu);
+
+        JMenuItem openItem = new JMenuItem("Open");
+        JMenuItem saveItem = new JMenuItem("Save");
+        JMenuItem saveAndSubmitItem = new JMenuItem("Save and Submit");
+        JMenuItem cutItem = new JMenuItem("Cut");
+        JMenuItem copyItem = new JMenuItem("Copy");
+        JMenuItem pasteItem = new JMenuItem("Paste");
+
+        fileMenu.add(openItem);
+        fileMenu.add(saveItem);
+        fileMenu.add(saveAndSubmitItem);
+        editMenu.add(cutItem);
+        editMenu.add(copyItem);
+        editMenu.add(pasteItem);
+
+        fileChooser = new JFileChooser();
+
+        openItem.addActionListener(this);
+        saveItem.addActionListener(this);
+        saveAndSubmitItem.addActionListener(this);
+        cutItem.addActionListener(this);
+        copyItem.addActionListener(this);
+        pasteItem.addActionListener(this);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        String command = e.getActionCommand();
+
+        if ("Open".equals(command)) {
+            int returnValue = fileChooser.showOpenDialog(null);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                readFile(selectedFile);
+            }
+        } else if ("Save".equals(command)) {
+            int returnValue = fileChooser.showSaveDialog(null);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                saveFile(selectedFile);
+            }
+        } else if ("Save and Submit".equals(command)) {
+            int returnValue = fileChooser.showSaveDialog(null);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                saveFile(selectedFile);
+                closeEditor();
+            }
+        } else if ("Cut".equals(command)) {
+            textArea.cut();
+        } else if ("Copy".equals(command)) {
+            textArea.copy();
+        } else if ("Paste".equals(command)) {
+            textArea.paste();
+        }
+    }
+
+    private void readFile(File file) {
+        try {
+            FileReader fileReader = new FileReader(file);
+            BufferedReader reader = new BufferedReader(fileReader);
+            textArea.read(reader, null);
+            reader.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void saveFile(File file) {
+        try {
+            FileWriter fileWriter = new FileWriter(file);
+            textArea.write(fileWriter);
+            fileWriter.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void closeEditor() {
+        dispose();
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            TextEditor editor = new TextEditor();
+            editor.setVisible(true);
+        });
+    }
+}
